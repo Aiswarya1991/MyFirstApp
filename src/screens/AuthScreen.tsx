@@ -226,15 +226,31 @@ const AuthScreen = ({ navigation, route }: any) => {
               style={styles.altButton}
               onPress={() => setIsEmployeeLogin(true)}
             >
-              <Text style={styles.altButtonText}>
+
+               <View style={styles.inputRowbtn}>
+              <Image
+                source={require('../../assets/images/employeeid.png')}
+                style={styles.iconLeft}
+              />
+               <Text style={styles.altButtonText}>
                 Sign In with Employee ID
               </Text>
+            </View>
+          
             </TouchableOpacity>
 
             <TouchableOpacity style={styles.altButton}>
-              <Text style={styles.altButtonText}>
-                Sign In with PHONE
+
+                <View style={styles.inputRowbtn}>
+              <Image
+                source={require('../../assets/images/phone.png')}
+                style={styles.iconLeft}
+              />
+             <Text style={styles.altButtonText}>
+                Sign In with Phone
               </Text>
+            </View>
+              
             </TouchableOpacity>
           </>
         )}
@@ -290,6 +306,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderWidth: 1,
     borderColor: '#D3D3D3',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    marginTop: 10,
+  },
+   inputRowbtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#fff',
     borderRadius: 8,
     paddingHorizontal: 12,
     marginTop: 10,
