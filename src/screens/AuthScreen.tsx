@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   Dimensions,
+  Image,
 } from 'react-native';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -21,7 +22,9 @@ type User = {
 
 const AuthScreen = ({ navigation, route }: any) => {
   const isSignupFromRoute = route?.params?.mode === 'signup';
+
   const [isSignup, setIsSignup] = useState(isSignupFromRoute || false);
+  const [isEmployeeLogin, setIsEmployeeLogin] = useState(false);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,7 +36,8 @@ const AuthScreen = ({ navigation, route }: any) => {
 
   const [users, setUsers] = useState<User[]>([]);
 
-  // ---------- VALIDATION ----------
+  /* ---------------- VALIDATION ---------------- */
+
   const emailError = useMemo(() => {
     if (!email) return 'Email is required';
     if (!emailRegex.test(email)) return 'Enter valid email';
@@ -52,13 +56,18 @@ const AuthScreen = ({ navigation, route }: any) => {
     return '';
   }, [confirmPassword, password, isSignup]);
 
-  const isFormValid =
-    !emailError &&
-    !passwordError &&
-    (!isSignup || !confirmPasswordError);
+  const isFormValid = isEmployeeLogin
+    ? employeeId.length > 0 && employeePassword.length > 0
+    : !emailError && !passwordError && (!isSignup || !confirmPasswordError);
+
+  /* ---------------- SUBMIT ---------------- */
 
   const handleSubmit = () => {
-    if (!isFormValid) return;
+    if (isEmployeeLogin) {
+      Alert.alert('Success', `Employee ${employeeId} signed in`);
+      navigation.replace('Home');
+      return;
+    }
 
     if (isSignup) {
       const existingUser = users.find(u => u.email === email);
@@ -69,219 +78,291 @@ const AuthScreen = ({ navigation, route }: any) => {
 
       setUsers([...users, { email, password }]);
       Alert.alert('Success', 'Account created!');
+      setIsSignup(false);
       setEmail('');
       setPassword('');
       setConfirmPassword('');
-      setIsSignup(false);
-    } else {
-      const user = users.find(u => u.email === email && u.password === password);
-      if (!user) {
-        Alert.alert('Error', 'Invalid email or password');
-        return;
-      }
-      navigation.replace('Home');
-    }
-  };
-
-  const handleEmployeeSignIn = () => {
-    if (!employeeId || !employeePassword) {
-      Alert.alert('Error', 'Employee ID and Password are required');
       return;
     }
-    // Replace this with your employee authentication logic
-    Alert.alert('Success', `Signed in as Employee ${employeeId}`);
+
+    const user = users.find(u => u.email === email && u.password === password);
+    if (!user) {
+      Alert.alert('Error', 'Invalid email or password');
+      return;
+    }
+
     navigation.replace('Home');
   };
 
   return (
     <View style={styles.container}>
-      {/* Top blue background */}
       <View style={styles.topBackground} />
 
-      {/* Sliding panel */}
       <KeyboardAvoidingView
         style={styles.panel}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <Text style={styles.title}>
-          {isSignup ? 'Sign Up' : 'Sign In'}
+          {isEmployeeLogin ? 'Employee Sign In' : isSignup ? 'Sign Up' : 'Sign In'}
         </Text>
 
-        {/* EMAIL */}
-        <TextInput
-          style={styles.inputEmail}
-          placeholder="Email"
-          placeholderTextColor="#888"
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-        {!!emailError && <Text style={styles.error}>{emailError}</Text>}
-
-        {/* PASSWORD */}
-        <View style={styles.passwordRow}>
-          <TextInput
-            style={styles.passwordInput}
-            placeholder="Password"
-            placeholderTextColor="#888"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-          />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-            <Text style={styles.eye}>{showPassword ? '🙈' : '👁️'}</Text>
-          </TouchableOpacity>
-        </View>
-        {!!passwordError && <Text style={styles.error}>{passwordError}</Text>}
-
-        {/* CONFIRM PASSWORD */}
-        {isSignup && (
+        {!isEmployeeLogin ? (
           <>
-            <TextInput
-              style={styles.passwordRow}
-              placeholder="Confirm Password"
-              placeholderTextColor="#888"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry={!showPassword}
-            />
-            {!!confirmPasswordError && (
-              <Text style={styles.error}>{confirmPasswordError}</Text>
+            {/* EMAIL */}
+            <View style={styles.inputRow}>
+              <Image
+                source={require('../../assets/images/email.png')}
+                style={styles.iconLeft}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+              />
+            </View>
+            {!!emailError && <Text style={styles.error}>{emailError}</Text>}
+
+            {/* PASSWORD */}
+            <View style={styles.inputRow}>
+              <Image
+                source={require('../../assets/images/password.png')}
+                style={styles.iconLeft}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+              />
+              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                <Image
+                  source={
+                    showPassword
+                      ? require('../../assets/images/eye.png')
+                      : require('../../assets/images/eye.png')
+                  }
+                  style={styles.iconRight}
+                />
+              </TouchableOpacity>
+            </View>
+            {!!passwordError && <Text style={styles.error}>{passwordError}</Text>}
+
+            {isSignup && (
+              <>
+                <View style={styles.inputRow}>
+                  <Image
+                    source={require('../../assets/images/password.png')}
+                    style={styles.iconLeft}
+                  />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    secureTextEntry
+                  />
+                </View>
+                {!!confirmPasswordError && (
+                  <Text style={styles.error}>{confirmPasswordError}</Text>
+                )}
+              </>
             )}
+          </>
+        ) : (
+          <>
+            {/* EMPLOYEE ID */}
+            <View style={styles.inputRow}>
+              <Image
+                source={require('../../assets/images/employeeid.png')}
+                style={styles.iconLeft}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="MY Employee ID"
+                value={employeeId}
+                onChangeText={setEmployeeId}
+              />
+            </View>
+
+            {/* EMPLOYEE PASSWORD */}
+            <View style={styles.inputRow}>
+              <Image
+                source={require('../../assets/images/password.png')}
+                style={styles.iconLeft}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="MY Password"
+                value={employeePassword}
+                onChangeText={setEmployeePassword}
+                secureTextEntry
+              />
+            </View>
           </>
         )}
 
-        {/* SIGN UP / SIGN IN BUTTON */}
         <TouchableOpacity
           style={[styles.button, { opacity: isFormValid ? 1 : 0.5 }]}
           disabled={!isFormValid}
           onPress={handleSubmit}
         >
           <Text style={styles.buttonText}>
-            {isSignup ? 'Sign Up' : 'Sign In'}
+            {isEmployeeLogin ? 'Employee Sign In' : isSignup ? 'Sign Up' : 'Sign In'}
           </Text>
         </TouchableOpacity>
-           {!isSignup && (
+
+        {!isSignup && !isEmployeeLogin && (
           <>
-  
+            <View style={styles.orContainer}>
+              <View style={styles.line} />
+              <Text style={styles.orText}>OR</Text>
+              <View style={styles.line} />
+            </View>
 
-        {/* OR Separator */}
-        <View style={styles.orContainer}>
-          <View style={styles.line} />
-          <Text style={styles.orText}>OR</Text>
-          <View style={styles.line} />
-        </View>
+            <TouchableOpacity
+              style={styles.altButton}
+              onPress={() => setIsEmployeeLogin(true)}
+            >
+              <Text style={styles.altButtonText}>
+                Sign In with Employee ID
+              </Text>
+            </TouchableOpacity>
 
-        {/* EMPLOYEE ID SIGN IN */}
-        <TextInput
-          style={styles.input}
-          placeholder="Sign In with Employee ID"
-          placeholderTextColor="#7B61FF"
-          value={employeeId}
-          onChangeText={setEmployeeId}
-        
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="Sign In with Phone"
-          placeholderTextColor="#7B61FF"
-          value={employeePassword}
-          onChangeText={setEmployeePassword}
-          secureTextEntry
-        />
-
-       </>
+            <TouchableOpacity style={styles.altButton}>
+              <Text style={styles.altButtonText}>
+                Sign In with PHONE
+              </Text>
+            </TouchableOpacity>
+          </>
         )}
-        {/* SWITCH */}
-        <TouchableOpacity onPress={() => setIsSignup(!isSignup)}>
-          <Text style={styles.switchText}>
-            {isSignup
-              ? 'Already have an account? Sign In'
-              : "Don't have an account? Sign Up"}
-          </Text>
-        </TouchableOpacity>
+
+        {isEmployeeLogin ? (
+          <TouchableOpacity onPress={() => setIsEmployeeLogin(false)}>
+            <Text style={styles.switchText}>Back to Email Sign In</Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity onPress={() => setIsSignup(!isSignup)}>
+            <Text style={styles.switchText}>
+              {isSignup
+                ? 'Already have an account? Sign In'
+                : "Don't have an account? Sign Up"}
+            </Text>
+          </TouchableOpacity>
+        )}
       </KeyboardAvoidingView>
     </View>
   );
 };
 
 export default AuthScreen;
-
 const styles = StyleSheet.create({
   container: { flex: 1 },
+
   topBackground: {
     position: 'absolute',
     width: '100%',
-    height: SCREEN_HEIGHT / 2,
+    height: SCREEN_HEIGHT / 3,
     backgroundColor: '#7B61FF',
   },
+
   panel: {
     position: 'absolute',
     bottom: 0,
     width: '100%',
-    height: (SCREEN_HEIGHT *3) / 4,
+    height: (SCREEN_HEIGHT * 2) / 3,
     backgroundColor: '#fff',
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     padding: 24,
-    justifyContent: 'center',
   },
+
   title: {
     fontSize: 20,
-    color: '#000',
-    marginBottom: 24,
     textAlign: 'center',
+    marginBottom: 24,
   },
-  input: {
-    backgroundColor: '#fff',
-    borderWidth:1,
-    borderColor:'#7B61FF',
-    borderRadius: 20,
-    textAlign:'center',
-    padding: 14,
-    marginTop: 10,
-  },
-   inputEmail: {
-    backgroundColor: '#fff',
-    borderWidth:1,
-    borderColor:'#D3D3D3',
-    borderRadius: 8,
-    textAlign:'left',
-    padding: 14,
-    marginTop: 10,
-  },
-  passwordRow: {
+
+  inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-        borderWidth:1,
-    borderColor:'#D3D3D3',
-    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#D3D3D3',
     borderRadius: 8,
+    paddingHorizontal: 12,
     marginTop: 10,
-    paddingHorizontal: 14,
   },
-  passwordInput: {
+
+  input: {
     flex: 1,
     paddingVertical: 14,
-    color: '#000',
   },
-  eye: { fontSize: 18, color: '#000' },
-  error: { color: '#FF4D4D', fontSize: 12, marginTop: 4 },
+
+  iconLeft: {
+    width: 20,
+    height: 20,
+    tintColor: '#7B61FF',
+    marginRight: 10,
+  },
+
+  iconRight: {
+    width: 20,
+    height: 20,
+    tintColor: '#7B61FF',
+  },
+
+  error: {
+    color: '#FF4D4D',
+    fontSize: 12,
+    marginTop: 4,
+  },
+
   button: {
     backgroundColor: '#7B61FF',
     padding: 16,
     borderRadius: 20,
-    marginTop: 16,
+    marginTop: 20,
   },
-  buttonText: { color: '#fff', textAlign: 'center', fontWeight: '600' },
-  switchText: { color: '#7B61FF', textAlign: 'center', marginTop: 20 },
+
+  buttonText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
 
   orContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     marginVertical: 16,
   },
+
   line: { flex: 1, height: 1, backgroundColor: '#ccc' },
-  orText: { marginHorizontal: 8, color: '#888', fontWeight: '600' },
+
+  orText: {
+    marginHorizontal: 8,
+    color: '#888',
+    fontWeight: '600',
+  },
+
+  altButton: {
+    borderWidth: 1,
+    borderColor: '#7B61FF',
+    borderRadius: 20,
+    padding: 14,
+    marginTop: 10,
+  },
+
+  altButtonText: {
+    color: '#7B61FF',
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+
+  switchText: {
+    color: '#7B61FF',
+    textAlign: 'center',
+    marginTop: 20,
+  },
 });
