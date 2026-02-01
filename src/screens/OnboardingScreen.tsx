@@ -11,7 +11,7 @@ import {
 export default function OnboardingScreen({ navigation }: any) {
   return (
     <ImageBackground
-      source={require('../../assets/images/onboarding.png')} // background image
+      source={require('../../assets/images/onboarding.png')}
       style={styles.background}
       resizeMode="cover"
     >
@@ -31,12 +31,17 @@ export default function OnboardingScreen({ navigation }: any) {
           />
         </View>
 
-        {/* Image 3 below stacked images */}
-        <Image
-          source={require('../../assets/images/image3.png')}
-          style={styles.image3}
-          resizeMode="contain"
-        />
+        {/* TEXT (replacing image3 ONLY) */}
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>
+            Navigate Your Work{'\n'}Journey Efficient & Easy
+          </Text>
+
+          <Text style={styles.subtitle}>
+            Increase your work management & career{'\n'}
+            development radically
+          </Text>
+        </View>
       </View>
 
       {/* Bottom Buttons */}
@@ -64,62 +69,87 @@ const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     height: '100%',
-    justifyContent: 'space-between', // space top and bottom
+    justifyContent: 'space-between',
     paddingHorizontal: 0,
   },
+
   topContainer: {
     alignItems: 'center',
     marginTop: 60,
   },
+
   imageStack: {
     position: 'relative',
     width: 300,
     height: 200,
     marginBottom: 20,
   },
+
   image1: {
     position: 'absolute',
-    width: 300,
+    width:250,
     height: 400,
     top: 0,
     left: 0,
-    alignContent:'stretch',
+    alignContent: 'stretch',
   },
+
   image2: {
     position: 'relative',
     width: 300,
     height: 400,
-
-    top: 25,
+    top: 140,
     left: 25,
   },
-  image3: {
-    width: 400, // adjust width as needed
-    height: 100, // adjust height as needed
-    marginTop: 150,
+
+  /* ONLY NEW STYLES */
+  textContainer: {
+    width: 400,
+    marginTop: 250, // SAME as image3 margin
+    alignItems: 'center',
   },
+
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#000',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+
+  subtitle: {
+    fontSize: 14,
+    color: '#666',
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+
   bottomContainer: {
     paddingHorizontal: 24,
     paddingBottom: 40,
   },
+
   signUpBtn: {
     backgroundColor: '#6C63FF',
     paddingVertical: 16,
     borderRadius: 12,
     marginBottom: 16,
   },
+
   signUpText: {
     color: '#fff',
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '600',
   },
+
   signInBtn: {
     borderWidth: 2,
     borderColor: '#6C63FF',
     paddingVertical: 16,
     borderRadius: 12,
   },
+
   signInText: {
     color: '#6C63FF',
     textAlign: 'center',

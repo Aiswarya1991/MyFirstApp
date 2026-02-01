@@ -1,4 +1,6 @@
 import React from 'react';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 import {
   View,
   Text,
@@ -8,8 +10,8 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+const HomeScreen = ({ navigation }: any) => {
 
-const HomeScreen = () => {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={{ flex: 1 }}>
@@ -46,19 +48,28 @@ const HomeScreen = () => {
             </View>
           </View>
 
-          {/* BANNER */}
-          <View style={styles.banner}>
+          {/* BANNER → ATTENDANCE ENTRY */}
+          <TouchableOpacity
+            style={styles.banner}
+            activeOpacity={0.9}
+            onPress={() => navigation.navigate('Attendance')}
+          >
             <View>
               <Text style={styles.bannerTitle}>My Work Summary</Text>
               <Text style={styles.bannerSub}>
                 Today task & presence activity
               </Text>
+
+              <View style={styles.clockInBtn}>
+                <Text style={styles.clockInText}>Clock In</Text>
+              </View>
             </View>
+
             <Image
               source={require('../../assets/images/camera.png')}
               style={styles.bannerImage}
             />
-          </View>
+          </TouchableOpacity>
 
           {/* TODAY MEETING */}
           <View style={styles.card}>
@@ -172,12 +183,30 @@ const HomeScreen = () => {
 
         {/* BOTTOM TAB BAR */}
         <View style={styles.tabBar}>
-          <Image source={require('../../assets/images/home.png')} style={styles.tabIcon} />
-          <Image source={require('../../assets/images/calander.png')} style={styles.tabIcon} />
-          <Image source={require('../../assets/images/note.png')} style={styles.tabIcon} />
-          <Image source={require('../../assets/images/notice.png')} style={styles.tabIcon} />
-          <Image source={require('../../assets/images/menu.png')} style={styles.tabIcon} />
-        </View>
+  <TouchableOpacity style={styles.tabItem}>
+    <Image source={require('../../assets/images/home.png')} style={styles.tabIcon} />
+  </TouchableOpacity>
+
+  <TouchableOpacity
+    style={styles.tabItem}
+    onPress={() => navigation.navigate('Attendance')}
+  >
+    <Image source={require('../../assets/images/calander.png')} style={styles.tabIcon} />
+  </TouchableOpacity>
+
+  <TouchableOpacity style={styles.tabItem}>
+    <Image source={require('../../assets/images/note.png')} style={styles.tabIcon} />
+  </TouchableOpacity>
+
+  <TouchableOpacity style={styles.tabItem}>
+    <Image source={require('../../assets/images/notice.png')} style={styles.tabIcon} />
+  </TouchableOpacity>
+
+  <TouchableOpacity style={styles.tabItem}>
+    <Image source={require('../../assets/images/menu.png')} style={styles.tabIcon} />
+  </TouchableOpacity>
+</View>
+
       </View>
     </SafeAreaView>
   );
@@ -224,6 +253,16 @@ const styles = StyleSheet.create({
   bannerTitle: { color: '#fff', fontSize: 16, fontWeight: '700' },
   bannerSub: { color: '#E0DFFF', marginTop: 4 },
   bannerImage: { width: 80, height: 80, resizeMode: 'contain' },
+
+  clockInBtn: {
+    marginTop: 10,
+    backgroundColor: '#fff',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 10,
+    alignSelf: 'flex-start',
+  },
+  clockInText: { color: '#6C5CE7', fontWeight: '700' },
 
   card: {
     backgroundColor: '#fff',
@@ -330,17 +369,17 @@ const styles = StyleSheet.create({
   footerText: { marginLeft: 10, fontSize: 12, color: '#777' },
 
   tabBar: {
-    position: 'relative',
-    bottom: 0,
-
-    left: 0,
-    right: 0,
     height: 70,
     backgroundColor: '#000',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
   },
+  tabItem: {
+  flex: 1,
+  alignItems: 'center',
+},
+
   tabIcon: { width: 30, height: 30, tintColor: '#fff' },
 
   smallIcon: { width: 20, height: 20 },
