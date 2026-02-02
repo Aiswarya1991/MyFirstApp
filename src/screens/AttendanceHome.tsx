@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,41 +11,46 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAttendance } from '../context/AttendanceContext.tsx';
 
 const AttendanceHome = ({ navigation }: any) => {
-  const {
-    attendance,
-    startBreak,
-    endBreak,
-    clockOut,
-  } = useAttendance();
+  const { attendance, startBreak, endBreak, clockOut } =
+    useAttendance();
+
+  /* ---------- FORCE REFRESH EVERY MINUTE ---------- */
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      forceUpdate(v => v + 1);
+    }, 60000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   /* ---------- TIME CALCULATION ---------- */
-
   const calculateTodayHours = () => {
     if (!attendance.clockInTime) return '00:00 Hrs';
 
-    const start = new Date(`1970-01-01 ${attendance.clockInTime}`);
+    const start = attendance.clockInTime;
     const end = attendance.clockOutTime
-      ? new Date(`1970-01-01 ${attendance.clockOutTime}`)
-      : new Date();
+      ? attendance.clockOutTime
+      : Date.now();
 
-    let diff = end.getTime() - start.getTime();
+    let diff = end - start;
     diff -= attendance.totalBreakMinutes * 60000;
 
     if (diff < 0) diff = 0;
 
     const hrs = Math.floor(diff / 3600000);
-    const mins = Math.floor((diff % 3600000) / 60000);
+    const mins = Math.floor(
+      (diff % 3600000) / 60000
+    );
 
-    return `${String(hrs).padStart(2, '0')}:${String(mins).padStart(
-      2,
-      '0'
-    )} Hrs`;
+    return `${String(hrs).padStart(2, '0')}:${String(
+      mins
+    ).padStart(2, '0')} Hrs`;
   };
 
   const todayHours = calculateTodayHours();
   const payPeriodHours = '08:00 Hrs';
-
-  /* ---------- UI ---------- */
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -65,31 +70,43 @@ const AttendanceHome = ({ navigation }: any) => {
           </Text>
 
           <Image
-            source={require('../../assets/images/profile.png')}
+            source={require('../../assets/images/hrm.png')}
             style={styles.clockImg}
           />
         </View>
 
         {/* SUMMARY CARD */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Total Working Hour</Text>
+          <Text style={styles.cardTitle}>
+            Total Working Hour
+          </Text>
           <Text style={styles.cardSub}>
             Paid Period 1 Sept 2024 - 30 Sept 2024
           </Text>
 
-          <Text style={styles.status}>
+          {/* <Text style={styles.status}>
             Status: {attendance.status}
-          </Text>
+          </Text> */}
 
           <View style={styles.row}>
             <View style={styles.box}>
               <Text style={styles.boxLabel}>Today</Text>
-              <Text style={styles.boxValue}>{todayHours}</Text>
+              <Text style={styles.boxValue}>
+                 {new Date().toLocaleTimeString([], {
+              hour: '2-digit',
+              minute: '2-digit',
+            })+" Hrs"}
+               
+              </Text>
             </View>
 
             <View style={styles.box}>
-              <Text style={styles.boxLabel}>This Pay Period</Text>
-              <Text style={styles.boxValue}>{payPeriodHours}</Text>
+              <Text style={styles.boxLabel}>
+                This Pay Period
+              </Text>
+              <Text style={styles.boxValue}>
+                {payPeriodHours}
+              </Text>
             </View>
           </View>
 
@@ -98,8 +115,10 @@ const AttendanceHome = ({ navigation }: any) => {
           {/* CLOCK IN */}
           {attendance.status === 'IDLE' && (
             <TouchableOpacity
-              style={styles.clockBtn}
-              onPress={() => navigation.navigate('LocationCheck')}
+              style={[styles.clockBtn, { marginTop: 20 }]}
+              onPress={() =>
+                navigation.navigate('LocationCheck')
+              }
             >
               <Text style={styles.clockBtnText}>
                 Clock In Now
@@ -107,18 +126,26 @@ const AttendanceHome = ({ navigation }: any) => {
             </TouchableOpacity>
           )}
 
-          {/* BREAK + CLOCK OUT */}
+          {/* BREAK + CLOCK OUT (SAME ROW) */}
           {(attendance.status === 'CLOCKED_IN' ||
             attendance.status === 'ON_BREAK') && (
-            <View style={{ marginTop: 20 }}>
-              {/* TAKE BREAK / BACK TO WORK */}
+            <View
+              style={{
+                marginTop: 20,
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+              }}
+            >
               <TouchableOpacity
-                style={styles.clockBtn}
-                onPress={() => {
+                style={[
+                  styles.clockBtn,
+                  { width: '48%' },
+                ]}
+                onPress={() =>
                   attendance.status === 'CLOCKED_IN'
                     ? startBreak()
-                    : endBreak();
-                }}
+                    : endBreak()
+                }
               >
                 <Text style={styles.clockBtnText}>
                   {attendance.status === 'CLOCKED_IN'
@@ -127,13 +154,12 @@ const AttendanceHome = ({ navigation }: any) => {
                 </Text>
               </TouchableOpacity>
 
-              {/* CLOCK OUT */}
               <TouchableOpacity
                 style={[
                   styles.clockBtn,
                   {
-                    backgroundColor: '#FF7675',
-                    marginTop: 12,
+                    width: '48%',
+                    backgroundColor: '#000',
                   },
                 ]}
                 onPress={clockOut}
@@ -144,12 +170,32 @@ const AttendanceHome = ({ navigation }: any) => {
               </TouchableOpacity>
             </View>
           )}
+
+          {/* CLOCKED OUT */}
+          {attendance.status === 'CLOCKED_OUT' && (
+            <TouchableOpacity
+              style={[
+                styles.clockBtn,
+                {
+                  backgroundColor: '#B2BEC3',
+                  marginTop: 20,
+                },
+              ]}
+              disabled
+            >
+              <Text style={styles.clockBtnText}>
+                Clocked Out
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* HISTORY (STATIC) */}
         {[27, 26, 25].map(day => (
           <View key={day} style={styles.historyCard}>
-            <Text style={styles.date}>{day} September 2024</Text>
+            <Text style={styles.date}>
+              {day} September 2024
+            </Text>
 
             <View style={styles.historyRow}>
               <View>
@@ -189,7 +235,6 @@ const styles = StyleSheet.create({
   container: {
     paddingBottom: 120,
   },
-
   header: {
     backgroundColor: '#7B61FF',
     padding: 24,
@@ -219,13 +264,12 @@ const styles = StyleSheet.create({
     height: 70,
     resizeMode: 'contain',
   },
-
   card: {
     backgroundColor: '#fff',
     margin: 16,
     borderRadius: 16,
     padding: 16,
-    marginTop: -40,
+    marginTop: -15,
   },
   cardTitle: {
     fontSize: 16,
@@ -241,7 +285,6 @@ const styles = StyleSheet.create({
     color: '#6C5CE7',
     fontWeight: '600',
   },
-
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -262,7 +305,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     marginTop: 6,
   },
-
   clockBtn: {
     backgroundColor: '#6C5CE7',
     paddingVertical: 14,
@@ -274,7 +316,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-
   historyCard: {
     backgroundColor: '#fff',
     marginHorizontal: 16,

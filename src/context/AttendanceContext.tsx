@@ -8,8 +8,8 @@ type AttendanceStatus =
 
 interface AttendanceState {
   status: AttendanceStatus;
-  clockInTime: string | null;
-  clockOutTime: string | null;
+  clockInTime: number | null;
+  clockOutTime: number | null;
   breakStart: number | null;
   totalBreakMinutes: number;
 }
@@ -26,17 +26,14 @@ export const AttendanceProvider = ({ children }: any) => {
   });
 
   const clockIn = () => {
-    setAttendance({
-      status: 'CLOCKED_IN',
-      clockInTime: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      clockOutTime: null,
-      breakStart: null,
-      totalBreakMinutes: 0,
-    });
-  };
+  setAttendance({
+    status: 'CLOCKED_IN',
+    clockInTime: Date.now(),
+    clockOutTime: null,
+    breakStart: null,
+    totalBreakMinutes: 0,
+  });
+};
 
   const startBreak = () => {
     setAttendance(prev => ({
@@ -62,16 +59,13 @@ export const AttendanceProvider = ({ children }: any) => {
     }));
   };
 
-  const clockOut = () => {
-    setAttendance(prev => ({
-      ...prev,
-      status: 'CLOCKED_OUT',
-      clockOutTime: new Date().toLocaleTimeString([], {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-    }));
-  };
+ const clockOut = () => {
+  setAttendance(prev => ({
+    ...prev,
+    status: 'CLOCKED_OUT',
+    clockOutTime: Date.now(),
+  }));
+};
 
   return (
     <AttendanceContext.Provider

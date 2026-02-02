@@ -105,12 +105,12 @@ const styles = StyleSheet.create({
   /* ONLY NEW STYLES */
   textContainer: {
     width: 400,
-    marginTop: 250, // SAME as image3 margin
+    marginTop: 280, // SAME as image3 margin
     alignItems: 'center',
   },
 
   title: {
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: '700',
     color: '#000',
     textAlign: 'center',
